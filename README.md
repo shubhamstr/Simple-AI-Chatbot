@@ -49,16 +49,29 @@ chatbot-app/
 
    _(Or with `uv`: `uv pip install -r requirements.txt`)_
 
-4. Start the FastAPI development server:
+4. Configure environment variables:
+   Create a `.env` file inside the `backend/` directory with your Groq API key:
+   ```env
+   GROQ_API_KEY=your_groq_api_key_here
+   ```
+
+5. Start the FastAPI development server:
 
    ```bash
    uvicorn main:app --reload --port 8000
    ```
 
-5. The backend API is now running at:
+6. The backend API is now running at:
    - Base URL: `http://localhost:8000`
    - Interactive Swagger Docs: `http://localhost:8000/docs`
    - Health check: `http://localhost:8000/api/health`
+
+---
+
+### 📊 Monitoring & Logs
+
+Track and monitor model inferences and request activity in the Groq Dashboard:
+- **Groq Console Logs**: [https://console.groq.com/dashboard/logs?cursor=](https://console.groq.com/dashboard/logs?cursor=)
 
 ---
 
