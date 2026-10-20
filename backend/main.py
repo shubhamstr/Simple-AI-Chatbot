@@ -2,6 +2,13 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 import re
+from groq import Groq
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = FastAPI(
     title="AI Assistant Chatbot API",
@@ -42,26 +49,25 @@ class ChatResponse(BaseModel):
 
 
 def get_dummy_response(message: str) -> str:
-    """Generate a dummy chatbot response based on the input message."""
-    # Normalize: lowercase, strip extra whitespace, and remove ending punctuation for matching
-    normalized = message.lower().strip()
-    cleaned = re.sub(r"[!?.~,]+$", "", normalized).strip()
+    completion = client.chat.completions.create(
+        model="openai/gpt-oss-120b",
+        messages=[
+            {
+                "role": "user",
+                "content": message.lower()
+            }
+        ],
+        # temperature=1,
+        # max_completion_tokens=2048,
+        # top_p=1,
+        # reasoning_effort="medium",
+        stream=False,
+        # stop=None
+    )
 
-    # Rule-based pattern matching
-    if cleaned in ("hello", "hey", "greetings"):
-        return "Hello! How can I help you?"
-    elif cleaned in ("hi", "hola"):
-        return "Hi there! 👋"
-    elif cleaned in ("how are you", "how're you", "how are you doing", "how do you do"):
-        return "I'm doing great! How can I help you today?"
-    elif cleaned in ("what can you do", "who are you", "what is your name"):
-        return "I can answer your questions and assist you. Right now, I'm running in demo mode!"
-    elif cleaned in ("bye", "goodbye", "see you"):
-        return "Goodbye! Have a wonderful day!"
-    elif cleaned in ("thanks", "thank you"):
-        return "You're very welcome! Let me know if there's anything else I can do."
-    else:
-        return "This is a dummy chatbot response. AI integration can be added later."
+    return completion.choices[0].message.content
+    # for chunk in completion:
+    #     print(chunk.choices[0].delta.content or "", end="")
 
 
 @app.get("/", summary="Health Check")
